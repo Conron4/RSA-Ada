@@ -1,0 +1,11 @@
+name = "rsa"
+description = ""
+version = "0.1.0-dev"
+
+authors = ["Connor"]
+maintainers = ["Connor <example@example.com>"]
+licenses = "GPL-3.0-or-later"
+website = ""
+tags = []
+
+executables = ["rsa"]
