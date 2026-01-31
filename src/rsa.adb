@@ -28,9 +28,6 @@ procedure Rsa is
       return Bytes;
    end Read_Random_Bytes;
 
-
-
-
    --  Convert bytes to Big_Integer
    function Bytes_To_BI (Arr : Byte_Array) return Big_Integer is
       Result : Big_Integer := 0;
@@ -96,6 +93,38 @@ procedure Rsa is
       end if;
       return X;
    end Mod_Inv;
+      --  Modular exponentiation: Base^Exponent mod Modulus
+   function Mod_Exp (Base, Exponent, Modulus : Big_Integer) return Big_Integer is
+      Result : Big_Integer := 1;
+      B      : Big_Integer := Base mod Modulus;
+      E2     : Big_Integer := Exponent;
+   begin
+      while E2 > 0 loop
+         if (E2 mod 2) = 1 then
+            Result := (Result * B) mod Modulus;
+         end if;
+         E2 := E2 / 2;
+         if E2 > 0 then
+            B := (B * B) mod Modulus;
+         end if;
+      end loop;
+      return Result;
+   end Mod_Exp;
+   function Encrypt (Message : Big_Integer; E, N    : Big_Integer) return Big_Integer is
+      begin
+         if Message <= 0 or else Message >= N then
+            raise Constraint_Error with "Message out of range";
+         end if;
+      return Mod_Exp (Message, E, N);
+   end Encrypt;
+
+   function Decrypt
+     (Ciphertext : Big_Integer;
+      D, N       : Big_Integer) return Big_Integer
+   is
+   begin
+      return Mod_Exp (Ciphertext, D, N);
+   end Decrypt;
 
    --  Generate a random 32-bit prime
    function Rand_Prime return Big_Integer is
@@ -154,5 +183,18 @@ begin
 
    Put_Line ("Public exponent E = " & Big_Integer'Image (E));
    Put_Line ("Private exponent D = " & Big_Integer'Image (D));
+   declare
+   M : Big_Integer := 123456789;
+   C : Big_Integer;
+   R : Big_Integer;
+   begin
+      Put_Line ("Plaintext M = " & Big_Integer'Image (M));
+
+      C := Encrypt (M, E, N);
+      Put_Line ("Ciphertext C = " & Big_Integer'Image (C));
+
+      R := Decrypt (C, D, N);
+      Put_Line ("Recovered M = " & Big_Integer'Image (R));
+   end;
 
 end Rsa;
